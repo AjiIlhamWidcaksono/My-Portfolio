@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from '@inertiajs/react';
 
 export default function Works({ projects = [] }) {
     const [activeFilter, setActiveFilter] = useState('Semua');

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
 import useLenis from '@/Hooks/useLenis';
 import useCustomCursor from '@/Hooks/useCustomCursor';
 import CustomCursor from '@/Components/CustomCursor';
@@ -64,13 +63,17 @@ export default function PortfolioLayout({ children }) {
                 {/* Header / Navigation */}
                 <header className="fixed top-0 left-0 right-0 z-[1000] p-6 md:px-12 md:py-8 flex justify-between items-center mix-blend-difference pointer-events-none">
                     {/* Logo */}
-                    <Link 
-                        href="/" 
+                    <a 
+                        href="#" 
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
                         data-cursor="magnetic"
                         className="text-lg md:text-xl font-display font-bold uppercase tracking-widest text-[#F9F6F0] pointer-events-auto"
                     >
                         DESIGNER.
-                    </Link>
+                    </a>
 
                     {/* Right Options */}
                     <div className="flex items-center gap-6 pointer-events-auto">

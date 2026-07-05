@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <linearGradient id="bluegrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3c72"/>
+      <stop offset="100%" stop-color="#2a5298"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bluegrad)"/>
+  <rect x="25" y="25" width="550" height="750" fill="none" stroke="#F9F6F0" stroke-width="1" stroke-opacity="0.2" rx="15"/>
+  <text x="80" y="150" font-family="system-ui, sans-serif" font-weight="900" font-size="64px" fill="#F9F6F0" letter-spacing="-1px">WE'RE</text>
+  <text x="80" y="230" font-family="system-ui, sans-serif" font-weight="900" font-size="76px" fill="#FF5722" letter-spacing="-2px">HIRING!</text>
+  <text x="80" y="300" font-family="system-ui, sans-serif" font-weight="700" font-size="24px" fill="#F9F6F0" opacity="0.8">POSITION: GRAPHIC DESIGNER</text>
+  <rect x="80" y="360" width="440" height="150" rx="10" fill="#F9F6F0" fill-opacity="0.08"/>
+  <text x="110" y="410" font-family="system-ui, sans-serif" font-weight="700" font-size="16px" fill="#FF5722">PERSYARATAN:</text>
+  <text x="110" y="445" font-family="system-ui, sans-serif" font-size="14px" fill="#F9F6F0">• Menguasai Figma, Photoshop, Illustrator</text>
+  <text x="110" y="475" font-family="system-ui, sans-serif" font-size="14px" fill="#F9F6F0">• Kreatif, inovatif, &amp; komunikatif</text>
+  <text x="80" y="600" font-family="system-ui, sans-serif" font-weight="700" font-size="16px" fill="#F9F6F0" opacity="0.7">KIRIMKAN PORTFOLIO TERBAIK ANDA KE:</text>
+  <text x="80" y="635" font-family="system-ui, sans-serif" font-weight="900" font-size="22px" fill="#FF5722">EMAIL@PERUSAHAAN.COM</text>
+</svg>
