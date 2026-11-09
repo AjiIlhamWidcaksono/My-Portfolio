@@ -4,37 +4,38 @@ const forms = require('@tailwindcss/forms');
 module.exports = {
     darkMode: 'class',
     content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.jsx',
+        './index.html',
     ],
 
     theme: {
         extend: {
             colors: {
-                accent: {
-                    DEFAULT: '#FF5722',
-                    hover: '#E64A19',
-                    muted: 'rgba(255, 87, 34, 0.1)',
+                farline: {
+                    bg: '#fbfbf9',
+                    surface: '#ffffff',
+                    dark: '#14130e',
+                    muted: '#6f6e69',
+                    border: 'rgba(20, 19, 14, 0.08)',
+                    borderStrong: 'rgba(20, 19, 14, 0.16)',
+                    accent: '#14130e',
                 },
-                ivory: '#F9F6F0',
-                charcoal: '#0A0A0A',
-                cardLight: '#FFFFFF',
-                cardDark: '#121212',
+                accent: {
+                    DEFAULT: '#14130e',
+                    hover: '#333333',
+                    muted: 'rgba(20, 19, 14, 0.05)',
+                },
             },
             fontFamily: {
-                display: ['Clash Display', ...defaultTheme.fontFamily.sans],
-                sans: ['Satoshi', ...defaultTheme.fontFamily.sans],
+                display: ['Anton', ...defaultTheme.fontFamily.sans],
+                mono: ['"Fragment Mono"', 'monospace', ...defaultTheme.fontFamily.mono],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
-            animation: {
-                'marquee-slow': 'marquee 25s linear infinite',
-            },
-            keyframes: {
-                marquee: {
-                    '0%': { transform: 'translateX(0%)' },
-                    '100%': { transform: 'translateX(-50%)' },
-                }
+            boxShadow: {
+                'farline-card': '0 10px 30px -10px rgba(20, 19, 14, 0.08), 0 20px 40px -15px rgba(20, 19, 14, 0.05)',
+                'farline-lift': '0 25px 50px -12px rgba(20, 19, 14, 0.15)',
+                'farline-nav': '0 8px 32px 0 rgba(20, 19, 14, 0.08)',
             }
         },
     },
