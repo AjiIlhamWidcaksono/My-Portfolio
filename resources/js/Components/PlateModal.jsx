@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function PlateModal({ plate, onClose, onNext, onPrev }) {
+export default function PlateModal({ plate, onClose, onNext, onPrev, onEnquire }) {
     if (!plate) return null;
 
     return (
@@ -103,13 +103,12 @@ export default function PlateModal({ plate, onClose, onNext, onPrev }) {
                             </button>
                         </div>
 
-                        <a 
-                            href="#contact-section"
-                            onClick={onClose}
+                        <button 
+                            onClick={onEnquire || onClose}
                             className="px-6 py-2.5 bg-farline-dark text-white rounded-[2px] hover:bg-black transition-colors"
                         >
                             Enquire About This Work ↗
-                        </a>
+                        </button>
                     </div>
                 </motion.div>
             </div>

@@ -11,9 +11,12 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
         : items.filter(it => it.category === activeFilter);
 
     return (
-        <section 
-            id="gallery-section"
-            className="relative w-full py-24 md:py-32 px-6 md:px-12 max-w-7xl mx-auto border-t border-farline-border"
+        <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.4 }}
+            className="w-full pt-28 pb-36 px-6 sm:px-12 max-w-7xl mx-auto"
         >
             {/* Header & Filter Chips */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -21,7 +24,7 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
                     <span className="text-xs font-mono uppercase tracking-[0.25em] text-farline-muted">
                         Light Table / Studio Board
                     </span>
-                    <h2 className="text-4xl md:text-6xl font-display uppercase tracking-tight text-farline-dark mt-2">
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-display uppercase tracking-tight text-farline-dark mt-2">
                         Gallery Collection
                     </h2>
                 </div>
@@ -44,7 +47,7 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
                 </div>
             </div>
 
-            {/* Drag & Free Canvas Simulated Grid with Museum Mount Borders */}
+            {/* Gallery Grid */}
             <motion.div 
                 layout
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-12"
@@ -57,7 +60,7 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.4, delay: idx * 0.04 }}
+                            transition={{ duration: 0.35, delay: idx * 0.03 }}
                             onClick={() => onSelectPlate?.(item)}
                             className="group cursor-pointer bg-white p-4 sm:p-5 rounded-[3px] border border-farline-border shadow-farline-card hover:shadow-farline-lift transition-all duration-500 hover:-translate-y-1.5"
                         >
@@ -83,7 +86,7 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
                                 )}
 
                                 {/* Hover Overlay Spec Badge */}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-between text-white">
+                                <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-between text-white">
                                     <span className="text-[10px] font-mono uppercase tracking-widest">
                                         Plate {item.plate}
                                     </span>
@@ -91,7 +94,7 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
                                         <div className="text-[10px] font-mono text-white/70">
                                             {item.camera}
                                         </div>
-                                        <div className="text-[10px] font-mono text-white/90 font-medium">
+                                        <div className="text-[10px] font-mono text-white/95 font-medium">
                                             {item.edition}
                                         </div>
                                     </div>
@@ -116,6 +119,6 @@ export default function LightTableGallery({ items = [], onSelectPlate }) {
                     ))}
                 </AnimatePresence>
             </motion.div>
-        </section>
+        </motion.div>
     );
 }

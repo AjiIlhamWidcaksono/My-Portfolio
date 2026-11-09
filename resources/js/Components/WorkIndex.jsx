@@ -10,10 +10,13 @@ export default function WorkIndex({ items = [], onSelectPlate }) {
     };
 
     return (
-        <section 
-            id="work-section"
+        <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.4 }}
             onMouseMove={handleMouseMove}
-            className="relative w-full py-24 md:py-32 px-6 md:px-12 max-w-7xl mx-auto border-t border-farline-border"
+            className="w-full pt-28 pb-36 px-6 sm:px-12 max-w-7xl mx-auto"
         >
             {/* Section Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -21,19 +24,19 @@ export default function WorkIndex({ items = [], onSelectPlate }) {
                     <span className="text-xs font-mono uppercase tracking-[0.25em] text-farline-muted">
                         Index / Archive
                     </span>
-                    <h2 className="text-4xl md:text-6xl font-display uppercase tracking-tight text-farline-dark mt-2">
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-display uppercase tracking-tight text-farline-dark mt-2">
                         Complete Work Index
                     </h2>
                 </div>
 
                 <div className="text-xs font-mono uppercase tracking-widest text-farline-muted">
-                    Total: {items.length} Works cataloged
+                    Total: {items.length} Works Cataloged
                 </div>
             </div>
 
             {/* Editorial Minimalist Table */}
             <div className="w-full border-t border-farline-dark">
-                {items.map((item, idx) => (
+                {items.map((item) => (
                     <div
                         key={item.id}
                         onMouseEnter={() => setHoveredItem(item)}
@@ -46,17 +49,17 @@ export default function WorkIndex({ items = [], onSelectPlate }) {
                             <span className="text-xs font-mono text-farline-muted group-hover:text-farline-dark transition-colors">
                                 {item.plate}
                             </span>
-                            <h3 className="text-2xl md:text-3xl font-display uppercase tracking-tight text-farline-dark group-hover:translate-x-2 transition-transform duration-300">
+                            <h3 className="text-2xl sm:text-3xl font-display uppercase tracking-tight text-farline-dark group-hover:translate-x-2 transition-transform duration-300">
                                 {item.title}
                             </h3>
                         </div>
 
                         {/* Metadata Columns */}
-                        <div className="flex items-center gap-8 md:gap-16 mt-4 md:mt-0 text-xs font-mono text-farline-muted">
-                            <span className="hidden lg:inline-block w-32 truncate">{item.series}</span>
-                            <span className="w-24 text-right md:text-left">{item.place}</span>
+                        <div className="flex items-center gap-6 sm:gap-10 md:gap-16 mt-4 md:mt-0 text-xs font-mono text-farline-muted">
+                            <span className="hidden lg:inline-block w-36 truncate">{item.series}</span>
+                            <span className="w-24 text-left">{item.place}</span>
                             <span className="w-16 text-right">{item.year}</span>
-                            <span className="w-28 text-right font-semibold text-farline-dark">
+                            <span className="w-32 text-right font-semibold text-farline-dark">
                                 {item.category}
                             </span>
                             <span className="text-farline-borderStrong group-hover:text-farline-dark group-hover:translate-x-1 transition-all">
@@ -79,7 +82,7 @@ export default function WorkIndex({ items = [], onSelectPlate }) {
                             y: cursorPos.y - 120 
                         }}
                         exit={{ opacity: 0, scale: 0.85 }}
-                        transition={{ type: "spring", stiffness: 250, damping: 25 }}
+                        transition={{ type: "spring", stiffness: 280, damping: 25 }}
                         className="fixed top-0 left-0 pointer-events-none z-50 w-64 p-2 bg-white rounded-[3px] border border-farline-border shadow-farline-lift"
                     >
                         <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/5 rounded-[2px]">
@@ -103,11 +106,11 @@ export default function WorkIndex({ items = [], onSelectPlate }) {
                         </div>
                         <div className="mt-2 text-[10px] font-mono uppercase text-farline-muted flex justify-between">
                             <span>Plate {hoveredItem.plate}</span>
-                            <span className="text-farline-dark font-medium">{hoveredItem.camera.split('•')[0]}</span>
+                            <span className="text-farline-dark font-medium">{hoveredItem.category}</span>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </section>
+        </motion.div>
     );
 }
