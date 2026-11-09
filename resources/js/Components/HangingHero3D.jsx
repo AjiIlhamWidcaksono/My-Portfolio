@@ -1,13 +1,12 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HangingHero3D({ items = [], onSelectPlate }) {
     const containerRef = useRef(null);
-    const [posTarget, setPosTarget] = useState(0);
     const [posCur, setPosCur] = useState(0);
     const [hoveredIdx, setHoveredIdx] = useState(null);
     const [dimensions, setDimensions] = useState({ width: 1200, height: 800 });
     const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+    const [clock, setClock] = useState(0);
 
     const isDragging = useRef(false);
     const dragStartX = useRef(0);
@@ -15,8 +14,9 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
     const animFrameRef = useRef(null);
     const curRef = useRef(0);
     const targetRef = useRef(0);
+    const snapTimeoutRef = useRef(null);
 
-    // Update container dimensions
+    // Update container dimensions on resize
     useEffect(() => {
         const updateDims = () => {
             if (containerRef.current) {
@@ -31,20 +31,22 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
         return () => window.removeEventListener('resize', updateDims);
     }, []);
 
-    // Smooth animation loop for physics position lerp & clock sway
+    // Smooth physics loop (lerp movement & continuous clock for breathing animations)
     useEffect(() => {
         let lastTime = performance.now();
+        let runningClock = 0;
+
         const loop = (now) => {
             const dt = Math.min((now - lastTime) / 1000, 0.1);
             lastTime = now;
+            runningClock += dt;
+            setClock(runningClock);
 
-            // Lerp current position to target position
+            // Smooth position lerp
             const diff = targetRef.current - curRef.current;
-            curRef.current += diff * Math.min(1, dt * 7);
+            curRef.current += diff * Math.min(1, dt * 7.5);
 
-            if (Math.abs(diff) > 0.0005) {
-                setPosCur(curRef.current);
-            }
+            setPosCur(curRef.current);
 
             animFrameRef.current = requestAnimationFrame(loop);
         };
@@ -52,17 +54,25 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
         return () => cancelAnimationFrame(animFrameRef.current);
     }, []);
 
-    // Mouse wheel navigation
+    // Helper: Snap to closest plate when scrolling/dragging stops
+    const triggerSnap = useCallback(() => {
+        if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
+        snapTimeoutRef.current = setTimeout(() => {
+            // Snap target to nearest integer
+            targetRef.current = Math.round(targetRef.current);
+        }, 180);
+    }, []);
+
+    // Infinite wheel navigation without boundaries
     const handleWheel = useCallback((e) => {
         e.preventDefault();
         const delta = e.deltaY || e.deltaX;
         const speed = 0.0028;
-        const maxPos = items.length - 1;
-        targetRef.current = Math.max(-0.4, Math.min(maxPos + 0.4, targetRef.current + delta * speed));
-        setPosTarget(targetRef.current);
-    }, [items.length]);
+        // Infinite scroll: targetRef can increase/decrease indefinitely
+        targetRef.current += delta * speed;
+        triggerSnap();
+    }, [triggerSnap]);
 
-    // Attach non-passive wheel event
     useEffect(() => {
         const el = containerRef.current;
         if (el) {
@@ -71,15 +81,15 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
         }
     }, [handleWheel]);
 
-    // Pointer Drag Handling
+    // Pointer Drag Handling (Infinite)
     const handlePointerDown = (e) => {
         isDragging.current = true;
         dragStartX.current = e.clientX;
         dragStartPos.current = targetRef.current;
+        if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
     };
 
     const handlePointerMove = (e) => {
-        // Calculate mouse parallax offset from screen center (-1 to 1)
         if (containerRef.current) {
             const rect = containerRef.current.getBoundingClientRect();
             const mx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -90,60 +100,79 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
         if (!isDragging.current) return;
         const dx = e.clientX - dragStartX.current;
         const sensitivity = 0.0035;
-        const maxPos = items.length - 1;
-        targetRef.current = Math.max(-0.4, Math.min(maxPos + 0.4, dragStartPos.current - dx * sensitivity));
-        setPosTarget(targetRef.current);
+        targetRef.current = dragStartPos.current - dx * sensitivity;
     };
 
     const handlePointerUp = () => {
-        isDragging.current = false;
+        if (isDragging.current) {
+            isDragging.current = false;
+            triggerSnap();
+        }
     };
 
     // Keyboard navigation (Arrow keys)
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                targetRef.current = Math.min(items.length - 1, targetRef.current + 1);
-                setPosTarget(targetRef.current);
+                targetRef.current = Math.round(targetRef.current) + 1;
+                triggerSnap();
             } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                targetRef.current = Math.max(0, targetRef.current - 1);
-                setPosTarget(targetRef.current);
+                targetRef.current = Math.round(targetRef.current) - 1;
+                triggerSnap();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [items.length]);
+    }, [triggerSnap]);
 
-    // Farline 3D Camera & Perspective Parameters
+    // Geometry & Camera perspective parameters
     const { width: W, height: H } = dimensions;
     const isMobile = W < 768;
-    
-    // Perspective and Camera Angle
-    const fov = isMobile ? 75 : 82;
-    const perspectivePx = (H / 2) / Math.tan((fov * Math.PI) / 360);
-    
-    const baseCamX = isMobile ? 0.5 : 0.68;
-    const baseCamY = isMobile ? 0.35 : 0.28;
-    
-    // Parallax tilt from cursor
-    const camXPercent = (baseCamX + mouseOffset.x * 0.04) * 100;
-    const camYPercent = (baseCamY + mouseOffset.y * 0.04) * 100;
 
-    // 3D parameters per item
-    const stepX = isMobile ? 180 : 310;
-    const stepY = isMobile ? -50 : -90;
+    const fov = isMobile ? 76 : 84;
+    const perspectivePx = (H / 2) / Math.tan((fov * Math.PI) / 360);
+
+    const baseCamX = isMobile ? 0.5 : 0.65;
+    const baseCamY = isMobile ? 0.38 : 0.30;
+
+    const camXPercent = (baseCamX + mouseOffset.x * 0.035) * 100;
+    const camYPercent = (baseCamY + mouseOffset.y * 0.035) * 100;
+
+    // 3D trajectory line parameters
+    const anchorX = isMobile ? W * 0.38 : W * 0.38;
+    const anchorY = isMobile ? H * 0.40 : H * 0.38;
+    const stepX = isMobile ? 220 : 300;
+    const stepY = isMobile ? -65 : -80;
     const stepZ = isMobile ? -360 : -420;
-    const yaw = isMobile ? -14 : -22; // Degrees rotation into screen
+    const yaw = isMobile ? -16 : -22;
     const roll = 2.5;
 
-    // Calculate 3D points for each plate to draw connecting wire
-    const plateCoords = items.map((_, i) => {
-        const r = i - posCur;
-        const x = (isMobile ? W * 0.35 : W * 0.42) + r * stepX;
-        const y = (isMobile ? H * 0.36 : H * 0.34) + r * stepY;
-        const z = r * stepZ;
-        return { x, y, z, r };
-    });
+    // Infinite Euclidean wrap modulo
+    const L = items.length;
+    const wrap = (val, max) => ((val % max) + max) % max;
+
+    // Active plate index for header display
+    const activeDisplayIdx = wrap(Math.round(posCur), L);
+    const activeItem = items[activeDisplayIdx] || items[0];
+
+    // Calculate unbroken, straight 3D steel wire from offscreen front-left to offscreen back-right
+    const rStart = -5.5;
+    const rEnd = L + 4.5;
+    const wireX1 = anchorX + rStart * stepX;
+    const wireY1 = anchorY + rStart * stepY;
+    const wireZ1 = rStart * stepZ;
+
+    const wireX2 = anchorX + rEnd * stepX;
+    const wireY2 = anchorY + rEnd * stepY;
+    const wireZ2 = rEnd * stepZ;
+
+    const wdx = wireX2 - wireX1;
+    const wdy = wireY2 - wireY1;
+    const wdz = wireZ2 - wireZ1;
+
+    const wireLen = Math.sqrt(wdx * wdx + wdy * wdy + wdz * wdz);
+    const wireYaw = Math.atan2(-wdz, wdx) * (180 / Math.PI);
+    const wirePitch = Math.atan2(wdy, Math.hypot(wdx, wdz)) * (180 / Math.PI);
 
     return (
         <section 
@@ -163,10 +192,11 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
                 <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full bg-farline-dark animate-pulse" />
                     <span className="font-semibold text-farline-dark">3D Washing Line</span>
-                    <span className="hidden sm:inline text-farline-muted">• Drag or Wheel to Explore</span>
+                    <span className="hidden sm:inline text-farline-muted">• Infinite Loop • Scroll to Explore</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span>Plate {Math.min(items.length, Math.max(1, Math.round(posCur) + 1))} / {items.length}</span>
+                    <span>Plate {activeItem?.plate || '01'} / {L}</span>
+                    <span className="text-farline-dark font-medium hidden sm:inline">• {activeItem?.title}</span>
                 </div>
             </div>
 
@@ -175,54 +205,59 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 style={{ transformStyle: 'preserve-3d' }}
             >
-                {/* 3D Perspective Steel Wire connecting all hanging pegs */}
-                <svg 
-                    className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"
-                    style={{ transformStyle: 'preserve-3d' }}
-                >
-                    {plateCoords.map((pt, idx) => {
-                        if (idx === 0) return null;
-                        const prev = plateCoords[idx - 1];
-                        // If both points are within reasonable viewing range
-                        if (pt.z < 250 && pt.z > -3500 && prev.z < 250 && prev.z > -3500) {
-                            return (
-                                <line 
-                                    key={`wire-${idx}`}
-                                    x1={prev.x}
-                                    y1={prev.y}
-                                    x2={pt.x}
-                                    y2={pt.y}
-                                    stroke="#3A3833"
-                                    strokeWidth="1.75"
-                                    strokeOpacity="0.45"
-                                    style={{
-                                        transform: `translateZ(${(prev.z + pt.z) / 2}px)`,
-                                    }}
-                                />
-                            );
-                        }
-                        return null;
-                    })}
-                </svg>
+                {/* 1. Mathematically Straight, Continuous 3D Steel Wire (Never Cuts Off or Bends) */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: `${wireLen}px`,
+                        height: '2px',
+                        backgroundColor: '#3A3833',
+                        boxShadow: '0 1px 3px rgba(20, 19, 14, 0.25)',
+                        transformOrigin: '0 0',
+                        transform: `translate3d(${wireX1}px, ${wireY1}px, ${wireZ1}px) rotateY(${wireYaw}deg) rotateZ(${wirePitch}deg)`,
+                        pointerEvents: 'none',
+                        zIndex: 10,
+                    }}
+                />
 
-                {/* 3D Suspended Art Plates */}
+                {/* 2. Suspended Art Plates (Infinite Modular Circulation) */}
                 {items.map((item, index) => {
-                    const r = index - posCur;
-                    const x = (isMobile ? W * 0.35 : W * 0.42) + r * stepX;
-                    const y = (isMobile ? H * 0.36 : H * 0.34) + r * stepY;
+                    // Infinite relative position calculation centered around viewing window
+                    const offset = 1.8;
+                    const r = wrap(index - posCur + offset, L) - offset;
+
+                    // 3D coordinates on straight line
+                    const x = anchorX + r * stepX;
+                    const y = anchorY + r * stepY;
                     const z = r * stepZ;
 
-                    // Visibility culling: hide plates too far behind camera or too deep
-                    if (z > 220 || z < -3600) return null;
+                    // Culling: hide plates that are completely offscreen
+                    if (z > 300 || z < -4200) return null;
 
+                    // Active Front Card calculations (closest to r = 0)
+                    const distFromCenter = Math.abs(r);
+                    const isActive = distFromCenter < 0.55;
+                    const activeFactor = Math.max(0, 1 - distFromCenter * 1.8);
+
+                    // Organic breathing & floating animation on the active / closest plate
+                    const floatY = isActive ? Math.sin(clock * 2.4) * 6 : 0;
+                    const floatZ = isActive ? Math.cos(clock * 2.4) * 10 : 0;
+                    const elevateY = activeFactor * -32 + floatY;
+                    const elevateZ = activeFactor * 75 + floatZ;
+                    const scaleFactor = 1 + activeFactor * 0.16;
+
+                    // Smooth fade out as card approaches front-left screen edge (prevents harsh cut)
+                    const opacity = r < 0 
+                        ? Math.max(0, Math.min(1, (r + 1.6) / 1.1))
+                        : Math.min(1, Math.max(0, (4000 + z) / 1400));
+
+                    if (opacity <= 0.01) return null;
+
+                    // Organic subtle pendulum breeze sway
+                    const sway = Math.sin(clock * 1.6 + index * 0.8) * (isActive ? 2.8 : 1.4);
                     const isHovered = hoveredIdx === index;
-                    // Distance fade (closer plates are 1, far plates fade into the haze)
-                    const opacity = z > 100 
-                        ? Math.max(0, (220 - z) / 120) 
-                        : Math.min(1, Math.max(0, (3600 + z) / 1200));
-
-                    // Natural organic pendulum sway on wind
-                    const swayAngle = Math.sin((index * 1.5) + (posCur * 1.2)) * 1.8;
 
                     return (
                         <div
@@ -236,14 +271,16 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
                             className="absolute top-0 left-0 pointer-events-auto cursor-pointer group"
                             style={{
                                 transformStyle: 'preserve-3d',
-                                transform: `translate3d(${x}px, ${y}px, ${z}px) rotateY(${yaw}deg) rotateZ(${roll + swayAngle}deg) ${isHovered ? 'translateY(-22px) scale(1.04)' : ''}`,
+                                transform: `translate3d(${x}px, ${y + elevateY + (isHovered ? -15 : 0)}px, ${z + elevateZ}px) rotateY(${yaw}deg) rotateZ(${roll + sway}deg) scale(${scaleFactor})`,
                                 transformOrigin: 'top center',
                                 opacity,
-                                transition: 'transform 0.35s cubic-bezier(0.2, 0.8, 0.25, 1), opacity 0.2s linear',
+                                transition: isDragging.current 
+                                    ? 'opacity 0.2s linear' 
+                                    : 'transform 0.45s cubic-bezier(0.2, 0.8, 0.25, 1), opacity 0.25s linear',
                                 willChange: 'transform, opacity',
                             }}
                         >
-                            {/* Wooden Peg (Jepitan Kayu di Tali Kawat) */}
+                            {/* Wooden Peg (Jepitan Kayu Asli yang menempel tepat di tali kawat) */}
                             <div className="relative -top-3.5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
                                 <img 
                                     src="images/peg_front.png" 
@@ -254,7 +291,11 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
                             </div>
 
                             {/* White Museum Mount Print Sheet */}
-                            <div className="relative -translate-x-1/2 bg-white p-3.5 sm:p-4 rounded-[3px] border border-farline-border shadow-[0_15px_40px_-10px_rgba(20,19,14,0.18)] group-hover:shadow-[0_30px_60px_-15px_rgba(20,19,14,0.3)] transition-shadow duration-500 w-[240px] sm:w-[290px] md:w-[330px]">
+                            <div className={`relative -translate-x-1/2 bg-white p-3.5 sm:p-4 rounded-[3px] border ${
+                                isActive 
+                                    ? 'border-farline-dark/30 shadow-[0_30px_70px_-15px_rgba(20,19,14,0.32)] ring-1 ring-farline-dark/10' 
+                                    : 'border-farline-border shadow-[0_15px_40px_-10px_rgba(20,19,14,0.18)]'
+                            } transition-all duration-500 w-[240px] sm:w-[290px] md:w-[330px]`}>
                                 {/* Artwork Canvas */}
                                 <div className={`relative w-full ${item.aspect || 'aspect-[3/4]'} bg-[#14130e]/5 overflow-hidden rounded-[2px]`}>
                                     {item.hasVideo ? (
@@ -277,7 +318,8 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
                                     )}
 
                                     {/* Top Plate Tag */}
-                                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-[2px] text-[9px] font-mono uppercase text-white/95 tracking-widest">
+                                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-[2px] text-[9px] font-mono uppercase text-white/95 tracking-widest flex items-center gap-1.5">
+                                        {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />}
                                         Plate {item.plate}
                                     </div>
 
@@ -319,11 +361,11 @@ export default function HangingHero3D({ items = [], onSelectPlate }) {
             {/* Bottom Controls & Interaction Guidance */}
             <div className="relative z-30 pb-24 px-6 sm:px-12 flex justify-between items-end text-[11px] font-mono uppercase tracking-[0.2em] text-farline-muted pointer-events-none">
                 <div className="flex items-center gap-4">
-                    <span className="text-farline-dark font-semibold">Drag / Scroll to Move Line</span>
+                    <span className="text-farline-dark font-semibold">Drag / Scroll to Glide Line</span>
                     <span className="text-farline-borderStrong">← →</span>
                 </div>
                 <div>
-                    <span className="text-farline-dark font-semibold">Click Card for Specs ↗</span>
+                    <span className="text-farline-dark font-semibold">Click Plate for Specs ↗</span>
                 </div>
             </div>
         </section>
