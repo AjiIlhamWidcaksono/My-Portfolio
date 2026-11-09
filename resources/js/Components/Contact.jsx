@@ -99,89 +99,55 @@ export default function Contact() {
 
                     {/* Sisi Kanan: Formulir Kontak */}
                     <div className="md:col-span-7">
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                             {/* Input Nama */}
-                            <div className="relative w-full">
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="name-input" className="text-xs uppercase font-bold tracking-widest text-charcoal/60 dark:text-ivory/60">
+                                    Nama Anda <span className="text-accent">*</span>
+                                </label>
                                 <input
+                                    id="name-input"
                                     type="text"
                                     name="name"
                                     required
+                                    placeholder="Tuliskan nama Anda..."
                                     value={formState.name}
                                     onChange={handleChange}
-                                    onFocus={() => handleFocus('name')}
-                                    onBlur={() => handleBlur('name')}
-                                    className="w-full py-3 bg-transparent border-b-2 border-charcoal/10 dark:border-ivory/10 outline-none text-sm font-semibold transition-colors duration-300 focus:border-charcoal/30 dark:focus:border-ivory/30"
-                                />
-                                <label 
-                                    className={`absolute left-0 top-3 text-sm tracking-wider uppercase font-bold transition-all duration-300 pointer-events-none ${
-                                        focusedField === 'name' || formState.name
-                                            ? '-translate-y-7 text-xs text-accent'
-                                            : 'text-charcoal/30 dark:text-ivory/30'
-                                    }`}
-                                >
-                                    Nama Anda
-                                </label>
-                                {/* Animated active border */}
-                                <div 
-                                    className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-500 ease-out ${
-                                        focusedField === 'name' ? 'w-full' : 'w-0'
-                                    }`}
+                                    className="w-full px-5 py-4 rounded-xl bg-charcoal/[0.03] dark:bg-ivory/[0.04] border border-charcoal/15 dark:border-ivory/15 outline-none text-sm font-semibold transition-all duration-300 focus:border-accent dark:focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-charcoal/30 dark:placeholder:text-ivory/30 text-charcoal dark:text-ivory"
                                 />
                             </div>
 
                             {/* Input Email */}
-                            <div className="relative w-full">
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="email-input" className="text-xs uppercase font-bold tracking-widest text-charcoal/60 dark:text-ivory/60">
+                                    Email Anda <span className="text-accent">*</span>
+                                </label>
                                 <input
+                                    id="email-input"
                                     type="email"
                                     name="email"
                                     required
+                                    placeholder="nama@email.com"
                                     value={formState.email}
                                     onChange={handleChange}
-                                    onFocus={() => handleFocus('email')}
-                                    onBlur={() => handleBlur('email')}
-                                    className="w-full py-3 bg-transparent border-b-2 border-charcoal/10 dark:border-ivory/10 outline-none text-sm font-semibold transition-colors duration-300 focus:border-charcoal/30 dark:focus:border-ivory/30"
-                                />
-                                <label 
-                                    className={`absolute left-0 top-3 text-sm tracking-wider uppercase font-bold transition-all duration-300 pointer-events-none ${
-                                        focusedField === 'email' || formState.email
-                                            ? '-translate-y-7 text-xs text-accent'
-                                            : 'text-charcoal/30 dark:text-ivory/30'
-                                    }`}
-                                >
-                                    Email Anda
-                                </label>
-                                <div 
-                                    className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-500 ease-out ${
-                                        focusedField === 'email' ? 'w-full' : 'w-0'
-                                    }`}
+                                    className="w-full px-5 py-4 rounded-xl bg-charcoal/[0.03] dark:bg-ivory/[0.04] border border-charcoal/15 dark:border-ivory/15 outline-none text-sm font-semibold transition-all duration-300 focus:border-accent dark:focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-charcoal/30 dark:placeholder:text-ivory/30 text-charcoal dark:text-ivory"
                                 />
                             </div>
 
                             {/* Input Pesan */}
-                            <div className="relative w-full">
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor="message-input" className="text-xs uppercase font-bold tracking-widest text-charcoal/60 dark:text-ivory/60">
+                                    Pesan / Deskripsi Proyek <span className="text-accent">*</span>
+                                </label>
                                 <textarea
+                                    id="message-input"
                                     name="message"
                                     required
                                     rows="4"
+                                    placeholder="Ceritakan detail proyek, ekspektasi, atau ide kolaborasi Anda..."
                                     value={formState.message}
                                     onChange={handleChange}
-                                    onFocus={() => handleFocus('message')}
-                                    onBlur={() => handleBlur('message')}
-                                    className="w-full py-3 bg-transparent border-b-2 border-charcoal/10 dark:border-ivory/10 outline-none text-sm font-semibold transition-colors duration-300 resize-none focus:border-charcoal/30 dark:focus:border-ivory/30"
-                                />
-                                <label 
-                                    className={`absolute left-0 top-3 text-sm tracking-wider uppercase font-bold transition-all duration-300 pointer-events-none ${
-                                        focusedField === 'message' || formState.message
-                                            ? '-translate-y-7 text-xs text-accent'
-                                            : 'text-charcoal/30 dark:text-ivory/30'
-                                    }`}
-                                >
-                                    Pesan / Deskripsi Proyek
-                                </label>
-                                <div 
-                                    className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-500 ease-out ${
-                                        focusedField === 'message' ? 'w-full' : 'w-0'
-                                    }`}
+                                    className="w-full px-5 py-4 rounded-xl bg-charcoal/[0.03] dark:bg-ivory/[0.04] border border-charcoal/15 dark:border-ivory/15 outline-none text-sm font-semibold transition-all duration-300 resize-none focus:border-accent dark:focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-charcoal/30 dark:placeholder:text-ivory/30 text-charcoal dark:text-ivory"
                                 />
                             </div>
 

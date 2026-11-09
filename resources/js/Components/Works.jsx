@@ -92,6 +92,17 @@ export default function Works({ projects = [] }) {
 // Sub-Komponen Kartu Proyek Individual
 function ProjectCard({ project }) {
     const [isMuted, setIsMuted] = useState(true);
+    const videoRef = useRef(null);
+
+    const toggleMute = (e) => {
+        e.stopPropagation();
+        if (videoRef.current) {
+            videoRef.current.muted = !videoRef.current.muted;
+            setIsMuted(videoRef.current.muted);
+        } else {
+            setIsMuted(!isMuted);
+        }
+    };
 
     return (
         <motion.div
@@ -108,6 +119,7 @@ function ProjectCard({ project }) {
                 {/* Render Video Preview jika ada video_url dan diputar otomatis */}
                 {project.video_url ? (
                     <video
+                        ref={videoRef}
                         src={project.video_url}
                         autoPlay
                         loop
@@ -155,10 +167,7 @@ function ProjectCard({ project }) {
             {/* Mute/Unmute Overlay Button untuk Video */}
             {project.video_url ? (
                 <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsMuted(!isMuted);
-                    }}
+                    onClick={toggleMute}
                     className="absolute bottom-6 right-6 z-30 p-3 rounded-full bg-[#0A0A0A]/60 hover:bg-[#FF5722] text-[#F9F6F0] backdrop-blur-sm border border-ivory/10 hover:border-transparent transition-all duration-300 pointer-events-auto"
                     data-cursor="magnetic"
                     title={isMuted ? "Aktifkan Suara" : "Matikan Suara"}

@@ -47,7 +47,7 @@ export default function About({ tools = [] }) {
                         <div className="absolute inset-0 bg-[#FF5722] rounded-2xl rotate-3 scale-[0.98] group-hover:rotate-0 transition-transform duration-500 ease-out z-0" />
                         <div className="relative overflow-hidden rounded-2xl aspect-[3/4] bg-charcoal z-10 border border-charcoal/10 dark:border-ivory/10">
                             <img
-                                src="https://picsum.photos/id/64/600/800"
+                                src="images/pp.png"
                                 alt="Potret Desainer"
                                 className="w-full h-full object-cover grayscale contrast-115 hover:grayscale-0 hover:scale-105 transition-all duration-700 ease-out"
                             />
